@@ -70,7 +70,7 @@ def generate_file(filename, inactive, archive):
     if archive and os.path.isfile(filename):
         season_number = streamdata['value']['games']['season']['seasonNumber'] + 1  # 0-indexed, make 1-indexed
         day = streamdata['value']['games']['sim']['day'] + 2  # 0-indexed, make 1-indexed and add another if tomorrow
-        os.rename(filename, filename.replace(".csv", "S{}preD{}.csv".format(season_number + 1, day)))
+        os.rename(filename, filename.replace(".csv", "S{}preD{}.csv".format(season_number, day)))
     output = []
     all_player_ids, nameidx, positionidx = get_all_player_ids(streamdata)
     positions = ('lineup', 'rotation', 'bench', 'bullpen') if inactive else ('lineup', 'rotation')
