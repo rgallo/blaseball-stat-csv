@@ -58,7 +58,8 @@ def get_all_player_ids(snapshot):
         positions = ('lineup', 'rotation', 'bench', 'bullpen')
         for position in positions:
             for turnOrder, player_id in enumerate(team[position]):
-                player_ids[player_id] = [team['fullName'], team_leagues[team['id']][0], team_leagues[team['id']][1], None, position, turnOrder+1]
+                league, division = team_leagues[team['id']] if team['id'] in team_leagues else ("N/A", "N/A")
+                player_ids[player_id] = [team['fullName'], league, division, None, position, turnOrder+1]
     return player_ids, 3, 4
 
 
