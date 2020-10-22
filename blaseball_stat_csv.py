@@ -35,19 +35,19 @@ def get_team_leagues(snapshot):
 
 
 def batting_stars(player):
-    return ((1 - player["tragicness"]) ** .01) * (player["buoyancy"] ** 0) * (player["thwackability"] ** .35) * (player["moxie"] ** .075) * (player["divinity"] ** .35) * (player["musclitude"] ** .075) * ((1 - player["patheticism"]) ** .05) * (player["martyrdom"] ** .02) * 5.0
+    return ((1 - float(player["tragicness"])) ** .01) * (float(player["buoyancy"]) ** 0) * (float(player["thwackability"]) ** .35) * (float(player["moxie"]) ** .075) * (float(player["divinity"]) ** .35) * (float(player["musclitude"]) ** .075) * ((1 - float(player["patheticism"])) ** .05) * (float(player["martyrdom"]) ** .02) * 5.0
 
 
 def pitching_stars(player):
-    return (player["shakespearianism"] ** .1) * (player["suppression"] ** 0) * (player["unthwackability"] ** .5) * (player["coldness"] ** .025) * (player["overpowerment"] ** .15) * (player["ruthlessness"] ** .4) * 5.0
+    return (float(player["shakespearianism"]) ** .1) * (float(player["suppression"]) ** 0) * (float(player["unthwackability"]) ** .5) * (float(player["coldness"]) ** .025) * (float(player["overpowerment"]) ** .15) * (float(player["ruthlessness"]) ** .4) * 5.0
 
 
 def baserunning_stars(player):
-    return (player["laserlikeness"] ** .5) * (player["continuation"] ** .1) * (player["baseThirst"] ** .1) * (player["indulgence"] ** .1) * (player["groundFriction"] ** .1) * 5.0
+    return (float(player["laserlikeness"]) ** .5) * (float(player["continuation"]) ** .1) * (float(player["baseThirst"]) ** .1) * (float(player["indulgence"]) ** .1) * (float(player["groundFriction"]) ** .1) * 5.0
 
 
 def defense_stars(player):
-    return (player["omniscience"] ** .2) * (player["tenaciousness"] ** .2) * (player["watchfulness"] ** .1) * (player["anticapitalism"] ** .1) * (player["chasiness"] ** .1) * 5.0
+    return (float(player["omniscience"]) ** .2) * (float(player["tenaciousness"]) ** .2) * (float(player["watchfulness"]) ** .1) * (float(player["anticapitalism"]) ** .1) * (float(player["chasiness"]) ** .1) * 5.0
 
 
 def get_all_player_ids(snapshot):
