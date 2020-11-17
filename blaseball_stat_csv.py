@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import collections
+
 import requests
 import time
 import os
@@ -53,20 +55,20 @@ def defense_stars(player):
 def get_all_player_ids(snapshot):
     team_leagues = get_team_leagues(snapshot)
     allTeams = requests.get("https://blaseball.com/database/allTeams").json()
-    player_ids = {}
+    player_ids = collections.defaultdict(lambda: {})
     for team in allTeams:
         positions = ('lineup', 'rotation', 'bench', 'bullpen')
         for position in positions:
             for turnOrder, player_id in enumerate(team[position]):
                 league, division = team_leagues[team['id']] if team['id'] in team_leagues else ("N/A", "N/A")
-                player_ids[player_id] = [team['fullName'], league, division, None, position, turnOrder+1]
+                player_ids[team['id']][player_id] = [team['fullName'], league, division, None, position, turnOrder+1]
     return player_ids, 3, 4
 
 
 BATCH_SIZE = 100
 
 
-def generate_file(filename, inactive, archive):
+def generate_file(filename, inactive, archive, tournament):
     streamdata = get_stream_snapshot()
     if archive and os.path.isfile(filename):
         season_number = streamdata['value']['games']['season']['seasonNumber'] + 1  # 0-indexed, make 1-indexed
@@ -75,13 +77,21 @@ def generate_file(filename, inactive, archive):
     output = []
     all_player_ids, nameidx, positionidx = get_all_player_ids(streamdata)
     positions = ('lineup', 'rotation', 'bench', 'bullpen') if inactive else ('lineup', 'rotation')
-    player_id_list = [key for key, value in all_player_ids.items() if value[positionidx] in positions]
+    player_id_set = set()
+    for team_players in all_player_ids.values():
+        for player_id, player_data in team_players.items():
+            if player_data[positionidx] in positions:
+                player_id_set.add(player_id)
+    player_id_list = list(player_id_set)
     while player_id_list:
         player_id_batch = player_id_list[:BATCH_SIZE]
         playerdata = requests.get("https://blaseball.com/database/players?ids={}".format(",".join(player_id_batch))).json()
         for player in playerdata:
             player_id = player['id']
-            row = all_player_ids[player_id]
+            team_id = player['tournamentTeamId'] if tournament else player['leagueTeamId']
+            if not team_id:
+                continue
+            row = all_player_ids[team_id][player_id]
             row[nameidx] = player['name']
             row.extend([";".join(player[col]) if type(player[col]) == list else player[col] for col in JSON_COLUMNS])
             row.extend([starfunc(player) for starfunc in (batting_stars, pitching_stars, baserunning_stars, defense_stars)])
@@ -101,10 +111,11 @@ def handle_args():
     parser.add_argument('--output', default='output.csv', help="output filepath")
     parser.add_argument('--inactive', help="include inactive players(bench/bullpen)", action='store_true')
     parser.add_argument('--archive', help="backup existing file before generating", action='store_true')
+    parser.add_argument('--tournament', help="generate data for tournament teams", action='store_true')
     args = parser.parse_args()
     return args
 
 
 if __name__ == "__main__":
     args = handle_args()
-    generate_file(args.output, args.inactive, args.archive)
+    generate_file(args.output, args.inactive, args.archive, args.tournament)
