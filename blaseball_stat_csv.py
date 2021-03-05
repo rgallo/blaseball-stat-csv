@@ -87,6 +87,8 @@ def generate_file(filename, inactive, archive, tournament):
         player_id_batch = player_id_list[:BATCH_SIZE]
         playerdata = requests.get("https://blaseball.com/database/players?ids={}".format(",".join(player_id_batch))).json()
         for player in playerdata:
+            if player["deceased"]:
+                continue
             player_id = player['id']
             team_id = player['tournamentTeamId'] if tournament else player['leagueTeamId']
             if not team_id:
