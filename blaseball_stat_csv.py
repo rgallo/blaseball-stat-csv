@@ -1,4 +1,4 @@
-from blaseball_mike.models import League, SimulationData
+from blaseball_mike.models import League, SimulationData, Player
 import os
 import argparse
 import operator
@@ -72,11 +72,15 @@ def generate_file(filename, inactive, archive):
         else ("lineup", "rotation")
     )
     league = League.load()
+    players = Player.load_all()
     for subleague in league.subleagues.values():
         for division in subleague.divisions.values():
             for team in division.teams.values():
                 for position in positions:
-                    for turn_order, player in enumerate(getattr(team, position)):
+                    for turn_order, player_id in enumerate(
+                        getattr(team, "_{}_ids".format(position))
+                    ):
+                        player = players[player_id]
                         player_row = [
                             team.full_name,
                             subleague.name,
