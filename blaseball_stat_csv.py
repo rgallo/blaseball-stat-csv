@@ -2,6 +2,7 @@ from blaseball_mike.models import League, SimulationData, Player
 import os
 import argparse
 import operator
+import json
 
 COLUMNS = [
     "team",
@@ -55,6 +56,7 @@ COLUMNS = [
     "pitchingStars",
     "baserunningStars",
     "defenseStars",
+    "items",
 ]
 
 
@@ -133,6 +135,7 @@ def generate_file(filename, inactive, archive):
                             player.pitching_rating * 5.0,
                             player.baserunning_rating * 5.0,
                             player.defense_rating * 5.0,
+                            json.dumps(player.items),
                         ]
                         output.append(player_row)
     output.sort(key=operator.itemgetter(0, 4, 5))
