@@ -104,26 +104,27 @@ def adjust_stlats_for_items(player):
     items = player.items
     player_copy = Player(player.json())
     for item in items:
-        player_copy = handle_player_adjustments(
-            player_copy, item["root"]["adjustments"]
-        )
-        for section in ("root", "prePrefix", "postPrefix", "suffix"):
-            if item.get(section):
-                player_copy = handle_player_adjustments(
-                    player_copy, item[section]["adjustments"]
-                )
-        if item.get("prefixes"):
-            for prefix in item["prefixes"]:
-                player_copy = handle_player_adjustments(
-                    player_copy, prefix["adjustments"]
-                )
-        for category in ("defense", "hitting", "pitching", "baserunning"):
-            setattr(
-                player_copy,
-                "_{}_rating".format(category),
-                getattr(player_copy, "_{}_rating".format(category))
-                + item["{}Rating".format(category)],
+        if item["health"]:
+            player_copy = handle_player_adjustments(
+                player_copy, item["root"]["adjustments"]
             )
+            for section in ("root", "prePrefix", "postPrefix", "suffix"):
+                if item.get(section):
+                    player_copy = handle_player_adjustments(
+                        player_copy, item[section]["adjustments"]
+                    )
+            if item.get("prefixes"):
+                for prefix in item["prefixes"]:
+                    player_copy = handle_player_adjustments(
+                        player_copy, prefix["adjustments"]
+                    )
+            for category in ("defense", "hitting", "pitching", "baserunning"):
+                setattr(
+                    player_copy,
+                    "_{}_rating".format(category),
+                    getattr(player_copy, "_{}_rating".format(category))
+                    + item["{}Rating".format(category)],
+                )
     return player_copy
 
 
