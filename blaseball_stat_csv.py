@@ -55,8 +55,7 @@ COLUMNS = [
     "battingStars",
     "pitchingStars",
     "baserunningStars",
-    "defenseStars",
-    "items",
+    "defenseStars"
 ]
 
 
@@ -204,8 +203,7 @@ def generate_file(filename, inactive, archive, include_items):
                             player.batting_rating * 5.0,
                             player.pitching_rating * 5.0,
                             player.baserunning_rating * 5.0,
-                            player.defense_rating * 5.0,
-                            json.dumps(player.items),
+                            player.defense_rating * 5.0
                         ]
                         output.append(player_row)
     output.sort(key=operator.itemgetter(0, 4, 5))
