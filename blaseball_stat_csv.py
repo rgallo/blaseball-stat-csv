@@ -60,7 +60,75 @@ COLUMNS = [
 ]
 
 
-def generate_file(filename, inactive, archive):
+def get_adjustment_stat(idx):
+    return [
+        "tragicness",
+        "buoyancy",
+        "thwackability",
+        "moxie",
+        "divinity",
+        "musclitude",
+        "patheticism",
+        "martyrdom",
+        "cinnamon",
+        "base_thirst",
+        "laserlikeness",
+        "continuation",
+        "indulgence",
+        "ground_friction",
+        "shakespearianism",
+        "suppression",
+        "unthwackability",
+        "coldness",
+        "overpowerment",
+        "ruthlessness",
+        "pressurization",
+        "omniscience",
+        "tenaciousness",
+        "watchfulness",
+        "anticapitalism",
+        "chasiness",
+    ][idx]
+
+
+def handle_player_adjustments(player, adjustments):
+    for adjustment in adjustments:
+        if adjustment["type"] == 1:
+            stlat_name = get_adjustment_stat(adjustment["stat"])
+            setattr(
+                player, stlat_name, getattr(player, stlat_name) + adjustment["value"]
+            )
+    return player
+
+
+def adjust_stlats_for_items(player):
+    items = player.items
+    player_copy = Player(player.json())
+    for item in items:
+        player_copy = handle_player_adjustments(
+            player_copy, item["root"]["adjustments"]
+        )
+        for section in ("root", "prePrefix", "postPrefix", "suffix"):
+            if item.get(section):
+                player_copy = handle_player_adjustments(
+                    player_copy, item[section]["adjustments"]
+                )
+        if item.get("prefixes"):
+            for prefix in item["prefixes"]:
+                player_copy = handle_player_adjustments(
+                    player_copy, prefix["adjustments"]
+                )
+        for category in ("defense", "hitting", "pitching", "baserunning"):
+            setattr(
+                player_copy,
+                "_{}_rating".format(category),
+                getattr(player_copy, "_{}_rating".format(category))
+                + item["{}Rating".format(category)],
+            )
+    return player_copy
+
+
+def generate_file(filename, inactive, archive, include_items):
     sim = SimulationData.load()
     if archive and os.path.isfile(filename):
         os.rename(
@@ -83,6 +151,8 @@ def generate_file(filename, inactive, archive):
                         getattr(team, "_{}_ids".format(position))
                     ):
                         player = players[player_id]
+                        if include_items:
+                            player = adjust_stlats_for_items(player)
                         player_row = [
                             team.full_name,
                             subleague.name,
@@ -159,10 +229,17 @@ def handle_args():
     parser.add_argument(
         "--archive", help="backup existing file before generating", action="store_true"
     )
+    parser.add_argument(
+        "--items", help="include item adjustments in stlats", action="store_true"
+    )
     args = parser.parse_args()
     return args
 
 
-if __name__ == "__main__":
+def main():
     args = handle_args()
-    generate_file(args.output, args.inactive, args.archive)
+    generate_file(args.output, args.inactive, args.archive, args.items)
+
+
+if __name__ == "__main__":
+    main()
