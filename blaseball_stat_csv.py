@@ -4,6 +4,12 @@ import argparse
 import operator
 import json
 
+INVERSE_STLATS = [
+    "tragicness",
+    "patheticism",
+]  # These stlats are better for the target the smaller they are
+
+
 COLUMNS = [
     "team",
     "league",
@@ -55,7 +61,7 @@ COLUMNS = [
     "battingStars",
     "pitchingStars",
     "baserunningStars",
-    "defenseStars"
+    "defenseStars",
 ]
 
 
@@ -94,9 +100,18 @@ def handle_player_adjustments(player, adjustments):
     for adjustment in adjustments:
         if adjustment["type"] == 1:
             stlat_name = get_adjustment_stat(adjustment["stat"])
-            setattr(
-                player, stlat_name, getattr(player, stlat_name) + adjustment["value"]
-            )
+            if stlat_name in INVERSE_STLATS:
+                setattr(
+                    player,
+                    stlat_name,
+                    max(getattr(player, stlat_name) + adjustment["value"], 0.001),
+                )
+            else:
+                setattr(
+                    player,
+                    stlat_name,
+                    getattr(player, stlat_name) + adjustment["value"],
+                )
     return player
 
 
@@ -122,8 +137,11 @@ def adjust_stlats_for_items(player):
                 setattr(
                     player_copy,
                     "_{}_rating".format(category),
-                    getattr(player_copy, "_{}_rating".format(category))
-                    + item["{}Rating".format(category)],
+                    max(
+                        getattr(player_copy, "_{}_rating".format(category))
+                        + item["{}Rating".format(category)],
+                        0.001,
+                    ),
                 )
     return player_copy
 
@@ -204,7 +222,7 @@ def generate_file(filename, inactive, archive, include_items):
                             player.batting_rating * 5.0,
                             player.pitching_rating * 5.0,
                             player.baserunning_rating * 5.0,
-                            player.defense_rating * 5.0
+                            player.defense_rating * 5.0,
                         ]
                         output.append(player_row)
     output.sort(key=operator.itemgetter(0, 4, 5))
