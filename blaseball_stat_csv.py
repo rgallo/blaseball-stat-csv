@@ -104,13 +104,16 @@ def handle_player_adjustments(player, adjustments):
                 setattr(
                     player,
                     stlat_name,
-                    max(getattr(player, stlat_name) + adjustment["value"], 0.001),
+                    min(
+                        max(getattr(player, stlat_name) + adjustment["value"], 0.001),
+                        0.999,
+                    ),
                 )
             else:
                 setattr(
                     player,
                     stlat_name,
-                    getattr(player, stlat_name) + adjustment["value"],
+                    max(getattr(player, stlat_name) + adjustment["value"], 0.001),
                 )
     return player
 
@@ -138,8 +141,8 @@ def adjust_stlats_for_items(player):
                     player_copy,
                     "_{}_rating".format(category),
                     max(
-                        getattr(player_copy, "_{}_rating".format(category))
-                        + item["{}Rating".format(category)],
+                        (getattr(player_copy, "_{}_rating".format(category)) or 0.001)
+                        + (item["{}Rating".format(category)] or 0.001),
                         0.001,
                     ),
                 )
