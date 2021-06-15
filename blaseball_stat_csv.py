@@ -122,17 +122,17 @@ def adjust_stlats_for_items(player):
     items = player.items
     player_copy = Player(player.json())
     for item in items:
-        if item["health"]:
+        if item.health:
             player_copy = handle_player_adjustments(
-                player_copy, item["root"]["adjustments"]
+                player_copy, item.root["adjustments"]
             )
-            for section in ("root", "prePrefix", "postPrefix", "suffix"):
-                if item.get(section):
+            for section in ("root", "pre_prefix", "post_prefix", "suffix"):
+                if getattr(item, section):
                     player_copy = handle_player_adjustments(
-                        player_copy, item[section]["adjustments"]
+                        player_copy, getattr(item, section)["adjustments"]
                     )
-            if item.get("prefixes"):
-                for prefix in item["prefixes"]:
+            if item.prefixes:
+                for prefix in item.prefixes:
                     player_copy = handle_player_adjustments(
                         player_copy, prefix["adjustments"]
                     )
@@ -142,7 +142,7 @@ def adjust_stlats_for_items(player):
                     "_{}_rating".format(category),
                     max(
                         (getattr(player_copy, "_{}_rating".format(category)) or 0.001)
-                        + (item["{}Rating".format(category)] or 0.001),
+                        + (getattr(item, "{}_rating".format(category)) or 0.001),
                         0.001,
                     ),
                 )
