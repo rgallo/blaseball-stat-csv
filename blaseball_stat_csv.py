@@ -1,8 +1,8 @@
-from blaseball_mike.models import League, SimulationData, Player
 import os
 import argparse
 import operator
-import json
+from blaseball_mike.models import League, SimulationData, Player
+from blaseball_mike.tables import StatType
 
 INVERSE_STLATS = [
     "tragicness",
@@ -65,41 +65,14 @@ COLUMNS = [
 ]
 
 
-def get_adjustment_stat(idx):
-    return [
-        "tragicness",
-        "buoyancy",
-        "thwackability",
-        "moxie",
-        "divinity",
-        "musclitude",
-        "patheticism",
-        "martyrdom",
-        "cinnamon",
-        "base_thirst",
-        "laserlikeness",
-        "continuation",
-        "indulgence",
-        "ground_friction",
-        "shakespearianism",
-        "suppression",
-        "unthwackability",
-        "coldness",
-        "overpowerment",
-        "ruthlessness",
-        "pressurization",
-        "omniscience",
-        "tenaciousness",
-        "watchfulness",
-        "anticapitalism",
-        "chasiness",
-    ][idx]
-
-
 def handle_player_adjustments(player, adjustments):
     for adjustment in adjustments:
         if adjustment["type"] == 1:
-            stlat_name = get_adjustment_stat(adjustment["stat"])
+            stlat_name = StatType(adjustment["stat"]).stat_name
+            # TODO remove when fixed in blaseball-mike
+            if stlat_name == "shakesperianism":
+                stlat_name = "shakespearianism"
+            ###
             if stlat_name in INVERSE_STLATS:
                 setattr(
                     player,
@@ -218,7 +191,7 @@ def generate_file(filename, inactive, archive, include_items):
                             player.ritual,
                             player._blood_id,
                             player._coffee_id,
-                            ";".join(attr.id for attr in player.perm_attr),
+                            ";".join(attr.id for attr in player.perm_attr + player.item_attr),
                             ";".join(attr.id for attr in player.seas_attr),
                             ";".join(attr.id for attr in player.week_attr),
                             ";".join(attr.id for attr in player.game_attr),
