@@ -131,7 +131,7 @@ def generate_file(filename, inactive, archive, include_items):
         )
     output = []
     positions = (
-        ("lineup", "rotation", "bench", "bullpen")
+        ("lineup", "rotation", "shadows")
         if inactive
         else ("lineup", "rotation")
     )
