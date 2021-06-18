@@ -122,7 +122,7 @@ def adjust_stlats_for_items(player):
     return player_copy
 
 
-def generate_file(filename, inactive, archive, include_items):
+def generate_file(filename, inactive, archive, include_items, unscattered):
     sim = SimulationData.load()
     if archive and os.path.isfile(filename):
         os.rename(
@@ -131,9 +131,7 @@ def generate_file(filename, inactive, archive, include_items):
         )
     output = []
     positions = (
-        ("lineup", "rotation", "shadows")
-        if inactive
-        else ("lineup", "rotation")
+        ("lineup", "rotation", "shadows") if inactive else ("lineup", "rotation")
     )
     league = League.load()
     players = Player.load_all()
@@ -151,7 +149,9 @@ def generate_file(filename, inactive, archive, include_items):
                             team.full_name,
                             subleague.name,
                             division.name,
-                            player.name,
+                            player.name
+                            if not unscattered or "unscatteredName" not in player.state
+                            else player.state["unscatteredName"],
                             position,
                             turn_order + 1,
                             player.id,
@@ -191,7 +191,9 @@ def generate_file(filename, inactive, archive, include_items):
                             player.ritual,
                             player._blood_id,
                             player._coffee_id,
-                            ";".join(attr.id for attr in player.perm_attr + player.item_attr),
+                            ";".join(
+                                attr.id for attr in player.perm_attr + player.item_attr
+                            ),
                             ";".join(attr.id for attr in player.seas_attr),
                             ";".join(attr.id for attr in player.week_attr),
                             ";".join(attr.id for attr in player.game_attr),
@@ -225,13 +227,16 @@ def handle_args():
     parser.add_argument(
         "--items", help="include item adjustments in stlats", action="store_true"
     )
+    parser.add_argument("--unscattered", help="unscatter names", action="store_true")
     args = parser.parse_args()
     return args
 
 
 def main():
     args = handle_args()
-    generate_file(args.output, args.inactive, args.archive, args.items)
+    generate_file(
+        args.output, args.inactive, args.archive, args.items, args.unscattered
+    )
 
 
 if __name__ == "__main__":
